@@ -1,0 +1,683 @@
+<html>
+<head>
+	<title>US Baby names</title>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="babynamelist.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap3-typeahead.min.js"></script>
+    <script src="js/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="js/d3.slider.js"></script>
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-tagsinput.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/github.css">
+    <link rel="stylesheet" href="css/d3.slider.css"> 
+
+	<style type="text/css">
+		.axis path { fill: none; stroke: black;}
+		.axis line { stroke: black; }
+		.axis text { font-size: x-small; }
+		path {
+			stroke: black;
+			stroke-width: 1;
+			fill: none;
+			}
+		.brush .extent {
+		  stroke: #fff;
+		  fill-opacity: .125;
+		  shape-rendering: crispEdges;
+		}
+		.yeargraph.celebrities { cursor: pointer; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="btn-group" id="presidents">
+			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    US President Names <span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu scrollable-menu">
+			  </ul>
+			</div>
+			<div class="btn-group" id="gameOfThrones">
+			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    Game of Thrones-Inspired Names <span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu scrollable-menu">
+			  </ul>
+			</div>
+			<div class="btn-group" id="top20_2014">
+			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    2014 Top 20 names <span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu scrollable-menu">
+			  </ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-group" style="width: 100%;">
+			<input id="name_search" type="text" class="form-control" data-role="tagsinput">
+			<div id="removeall" class="input-group-addon" onclick="removeAllNames();">Remove all</div>
+			</div>
+		</div>
+		<div class="row" id="yeargraph_area">
+			<div class="col-xs-12" id="yeargraph"></div>
+		</div>
+
+		<div class="row">
+			<input type="button" value="Female" onclick="document.getElementById('rad1').click();">
+			<input type='radio' name='gender' id='rad1' value='F' CHECKED>
+			    <input type="button" value="Male  " onclick="document.getElementById('rad2').click();">
+			<input type='radio' name='gender' id='rad2' value='M'>
+
+			<div id="map"></div>
+			<div>
+			  <label for="year">Year:</label>
+			  <input type="text" id="year" value="2000" readonly style="border:0; color:#f6931f; font-weight:bold; font-size:20pt;">
+			<input class="slider-width" id="slider" type="range" min="1910" max="2014" value="2000"/><br>
+			 <div id="slider4"></div>
+			</div>
+		</div>
+
+	</div>
+	<script type="text/javascript">
+	// all names added on graph
+	var currentList = [];
+	var maxRate = 0;
+	var minYear, maxYear;
+	var celebritiesList = [];
+
+	var nametagColorMap = {}; 			
+	var colors = ["CASCADE", "WISTERIA_PURPLE", "STEEL_BLUE", "LYNCH", "SILVER", "SKY", "PEACH-COLORED", "HARBOR_RAT", "FOREIGN_CRIMSON", "AMBER", "CHESTNUT_ROSE", "JORDY", "ECSTASY", "IBIS_WING", "EGG-COLORED", "GAMBOGE", "CREAM_CAN", "LIGHT_BLUE", "TATARIAN_ASTER", "MEDIUM_CRIMSON", "RIPE_LEMON", "PICTON", "MOUNTAIN_MEADOW", "BELLFLOWER", "JUNGLE", "FRESH_ONION", "YOUNG_GREEN_ONION", "PURE_CRIMSON", "INDIGO", "LAPIS_LAZULI"];	
+	var colorsMap = {"CASCADE": "#95A5A6", "WISTERIA_PURPLE": "#875F9A", "STEEL_BLUE": "#4B77BE", "LYNCH": "#6C7A89", "SILVER": "#BFBFBF", "SKY": "#4D8FAC", "PEACH-COLORED": "#F47983", "HARBOR_RAT": "#757D75", "FOREIGN_CRIMSON": "#C91F37", "AMBER": "#CA6924", "CHESTNUT_ROSE":"#D24D57", "JORDY": "#89C4F4", "ECSTASY": "#F9690E", "IBIS_WING": "#F58F84", "EGG-COLORED":"#FFA631", "GAMBOGE": "#FFB61E", "CREAM_CAN": "#F5D76E", "LIGHT_BLUE": "#48929B", "TATARIAN_ASTER": "#8D608C", "MEDIUM_CRIMSON":"#C93756", "RIPE_LEMON": "#F7CA18", "PICTON": "#59ABE3", "MOUNTAIN_MEADOW": "#16A085", "BELLFLOWER": "#5D3F6A", "JUNGLE": "#26C281", "FRESH_ONION": "#5B8930", "YOUNG_GREEN_ONION": "#8DB255", "PURE_CRIMSON": "#C3272B", "INDIGO": "#264348", "LAPIS_LAZULI": "#1F4788"   };
+
+	var suffix = ["-F", "-M"];
+		
+	// name search input
+	var namesInput = $('#name_search');
+	namesInput.typeahead();
+	namesInput.tagsinput({
+		tagClass: function(item) {
+			var gender = item.split("-")[1];
+		    return "label "+item+" "+gender;
+		},
+		typeahead: {
+			source: allname
+		}
+	});
+
+	namesInput
+		.on('beforeItemRemove', function(event) {
+		   var tag = event.item;
+
+		   	// remove nametag from graph and currentlist
+			d3.selectAll("g."+tag).remove();
+			colors.push(nametagColorMap[tag]);
+			delete nametagColorMap[tag];
+			currentList = 
+				currentList.filter(function(name) {
+					return name.nametag != tag;
+				});
+
+			// rescale yscale
+			if (babyNamesByYear[tag]["max_rate"] == maxRate) 
+			{				
+					updateYScale();
+			}
+			updateXScale();
+			updateGraph();
+		})
+		.on('beforeItemAdd', function(event){
+			colors = _.shuffle(colors);	
+		})
+		.on('itemAdded', function(event) {
+			var tag = event.item;
+			var gender = tag.split("-")[1];
+			var name = tag.split("-")[0];
+			var colorScale = (gender == "F") ? fColorScale : mColorScale;
+
+			var color = colors.pop();
+			$(".label."+tag).addClass(color);
+			nametagColorMap[tag] = color;
+
+			currentList.push({"nametag":tag, "color": color} );
+			
+			updateYScale();	
+			updateXScale();
+			
+			updateGraph();
+			
+		});
+
+	var removeAllNames = function(){
+		currentList.forEach(function(name){
+			namesInput.tagsinput('remove', name.nametag);
+		});
+	};
+
+	var padding = 15;
+	var yeargraph_width = document.getElementById("yeargraph").offsetWidth;
+	var yeargraph_height = yeargraph_width * 0.5;
+	d3.select("#yeargraph_area").style("height", yeargraph_height);
+
+	var yeargraph_svg = d3.select("#yeargraph")
+						.append("svg")
+						// .attr("width", yeargraph_width)
+      					// .attr("height", yeargraph_height)
+            			.attr("viewBox", "0 0 "+yeargraph_width+" "+yeargraph_height)
+  						.attr("preserveAspectRatio", "xMidYMid meet")
+            			;
+    //preserveAspectRatio="xMinYMin meet"
+    var xScale = d3.scale.linear()
+					.domain([1880, 2014])
+					.range([padding*2, (yeargraph_width-padding)]);
+	
+	var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("bottom");
+
+	var yScale = d3.scale.linear()
+					.domain([0, 0.05])
+					.range([yeargraph_height - padding*2, padding]);
+
+	var yAxis = d3.svg.axis()
+					.scale(yScale)
+					.orient("left")
+					.tickFormat(d3.format(".00000000"));
+	// brush
+	var brush = d3.svg.brush()
+	    .x(xScale)
+	    .on("brushend", brushed);
+
+	function brushed() {
+		// remove graph on chart
+		d3.selectAll(".yeargraph").remove();
+
+		// when brush empty, show graph	with default scales
+		if(brush.empty()) {
+			updateXScale();
+			updateYScale();
+			updateGraph();
+		}
+		else {
+			var extent = brush.extent();
+			var startY = Math.ceil(extent[0]);
+			var endY = Math.floor(extent[1]);
+			var upperbound = 0;
+			celebritiesList = [];
+
+	    	currentList.forEach(function(nameData){
+	    		var nameYeardata = babyNamesByYear[nameData.nametag]["rateByYear"];
+	    		for(var year in nameYeardata) {
+	    			var rate = nameYeardata[year];
+					if(year >= startY && year <= endY && rate > upperbound) {
+						upperbound = rate;
+					}
+				}
+	    	});
+
+	    	// update Scales
+	    	updateXScale(startY, endY);
+	    	updateYScale(upperbound);
+	    	
+			currentList.forEach(function(nameData) {
+				var name = nameData.nametag.split("-")[0];
+				var gender = nameData.nametag.split("-")[1];
+				addNameToAreaChart(name, gender, colorsMap[nametagColorMap[nameData.nametag]], startY, endY);
+				if(name in celebrities && !_.contains(celebritiesList, name)) {
+					if(!(celebrities[name].endY < startY) && !(celebrities[name].startY > endY)) {
+						celebritiesList.push(name);
+					}
+					
+				}
+			});	
+			showCelebrityBlock(celebritiesList);
+		}
+		
+		d3.select("rect.extent").attr("width", 0);
+
+	}
+
+	yeargraph_svg.append("g")
+		.attr("class", "x brush")
+		.call(brush)
+		.selectAll("rect")
+		.attr("y", padding)
+		.style("height", yScale(0)-yScale(yScale.domain()[1]) );
+	// end brush
+
+	var updateYScale = function(upperbound){
+		if(_.isUndefined(upperbound)) {
+			maxRate = 0;
+			if(currentList.length == 0) {
+				maxRate = 0.005;
+			} 
+
+			currentList.forEach(function(name){
+				if(babyNamesByYear[name.nametag]["max_rate"] > maxRate) { maxRate = babyNamesByYear[name.nametag]["max_rate"]; }
+			});
+			yScale.domain([0, maxRate]);
+		}
+		else {
+			yScale.domain([0, upperbound]);
+		}
+
+		// change the y axis
+		yeargraph_svg.select(".y.axis")
+		.transition() 
+        .duration(250)
+        .call(yAxis);
+	};
+
+	var updateXScale = function(startYear, endYear){
+		if(_.isUndefined(startYear) || _.isUndefined(endYear))
+		{	
+			if(currentList.length == 0) {
+				startYear = 1880;
+				endYear = 2014;
+			}
+			else {
+				nameData = babyNamesByYear[currentList[0].nametag];
+				startYear = nameData.min_year;
+				endYear = nameData.max_year;
+			}
+
+			currentList.forEach(function(nameData){
+				nameyeardata = babyNamesByYear[nameData.nametag];
+				console.log(startYear, endYear, nameyeardata.min_year, nameyeardata.max_year );
+				if(_.isUndefined(startYear) || startYear > nameyeardata.min_year) {
+					startYear = nameyeardata.min_year ;
+				}
+				if(_.isUndefined(endYear) || endYear < nameyeardata.max_year) {
+					endYear = nameyeardata.max_year;
+				}
+			});
+		}
+		
+		startYear = (startYear < 1880)? 1880 : startYear;
+		xScale.domain([startYear, endYear]);
+		yeargraph_svg.select(".x.axis")
+			.transition()
+			.duration(250)
+			.call(xAxis);
+	};
+	var showCelebrityDetails = function(name, nameData){
+		// remove all elements on year graph svg
+		d3.selectAll(".yeargraph").remove();
+
+		var currentKey = currentList.map(function(n){return n.nametag;});
+		currentKey = currentKey.filter(function(key){return key == name+"-F" || key == name+"-M";});
+
+		var upperbound = 0;
+		currentKey.forEach(function(tag){
+			var nameYeardata = babyNamesByYear[tag]["rateByYear"];
+			for(var year in nameYeardata) {
+				var rate = nameYeardata[year];
+				if(year >= nameData.startY && year <= nameData.endY && rate > upperbound) {
+					upperbound = rate;
+				}
+			}
+		});
+
+		// update Scales
+		updateXScale(nameData.startY, nameData.endY);
+		updateYScale(upperbound);
+		
+		currentKey.forEach(function(nametag) {
+			var gender = nametag.split("-")[1];
+			addNameToAreaChart(name, gender.replace("-",""), colorsMap[nametagColorMap[nametag]], nameData.startY, nameData.endY);
+		});	
+		
+		var g = yeargraph_svg.append("g")
+				.attr("class","yeargraph")
+				;
+		g.append("svg:image")
+			.attr("xlink:href", nameData.imgsrc)
+			.attr("width", 200)
+			.attr("height", 200)
+			.attr("x", padding)
+			.attr("y", yScale(0) - 200 -padding);
+		g.append("text").text(nameData.pName)
+			.attr("x", padding)
+			.attr("y", yScale(0) - 15)
+			.style("font-size", 20)
+			.style("fill", "#757D75");
+	};
+
+	var showCelebrityBlock = function(celebritiesList){
+		var leftBound, rightBound;
+		var upperBound = yScale.domain()[1];
+		var xdomain0 = xScale.domain()[0];
+		var xdomain1 = xScale.domain()[1];
+
+		celebritiesList.forEach(function(name){
+			celebrities[name].forEach(function(nameData){
+				leftBound = (xdomain0 > nameData.startY)? xdomain0:nameData.startY;
+				rightBound = (xdomain1 < nameData.endY)? xdomain1:nameData.endY;
+
+				var barWidth = xScale(rightBound)-xScale(leftBound);
+				var barHeight = yScale(0)-yScale(upperBound);
+				if(barWidth > 0) {
+					var g = yeargraph_svg.append("g")
+					.attr("class", "yeargraph celebrities")
+					.attr("width", barWidth);
+				g.append("rect")
+					.attr("x", xScale(leftBound))
+					.attr("y", yScale(upperBound))
+					.attr("width", barWidth )
+					.attr("height", barHeight )
+					.style("fill", "#F2F1EF")
+					.style("opacity", 0.5)
+					.on("click",function(){
+						showCelebrityDetails(name, nameData);
+				    });
+				g.append("text").text(nameData.pName)
+					.attr("x", xScale(leftBound))
+					.attr("y", yScale(upperBound)+10)
+					.attr("width", barWidth)
+					.attr("font-size", 12)
+					.style("fill", "#757D75");
+				}
+				
+			});
+			
+		});
+	};
+
+	var updateGraph = function(){
+		celebritiesList = [];
+		minYear = xScale.domain()[0];
+		maxYear = xScale.domain[1];
+
+		d3.selectAll(".yeargraph").remove();
+		currentList.forEach(function(nameData){
+			var name = nameData.nametag.split("-")[0];
+			var gender = nameData.nametag.split("-")[1];
+			d3.select("g."+nameData.nametag).remove();
+			
+			addNameToAreaChart(name, gender, colorsMap[nameData.color]);
+
+			if(name in celebrities && !_.contains(celebritiesList, name)) {
+				if(!(celebrities[name].endY < minYear) && !(celebrities[name].startY > maxYear)) {
+				celebritiesList.push(name);
+				}
+			}
+
+		});
+
+		showCelebrityBlock(celebritiesList);
+	};		
+
+	/*append x-axis*/
+	yeargraph_svg.append("g")
+		.attr("transform", 
+			"translate("+ 0 +","+(yeargraph_height-padding*2)+")")
+		.attr("class", "axis x")
+		.call(xAxis);
+
+	/*append y-axis*/
+	yeargraph_svg.append("g")
+		.attr("transform", "translate("+padding*2+","+ 0 +")")
+		.attr("class", "axis y")
+		.call(yAxis);
+
+	var fColorScale = d3.scale.linear()
+	    .domain([0, 0.00000001, 0.00001, 0.01])
+	    // Syivia @uigradients
+	    .range(["#ff8f67", "#ff7e55","#ff6c41" , "#ff4d21"]);
+	var mColorScale = d3.scale.linear()
+		.domain([0, 0.00000001, 0.00001, 0.01])
+		// Green Beach @uigradients
+		.range(["#00caac", "#00c3ad", "#01b5af", "#02abb0"]);
+
+	// draw year line chart
+	var yearline = d3.svg.line()
+		.x(function(d) { return xScale(d.year); })
+		.y(function(d) { return yScale(d.count); });
+
+	var yearArea = d3.svg.area()
+		.x(function(d){ return xScale(d.year); })
+		.y0(function(d) { return yScale(0); })
+		.y1(function(d) { return yScale(d.count); });
+
+	var addNameToAreaChart = function(name, gender, color, startYear, endYear) {
+		var nameYeardata = babyNamesByYear[name+"-"+gender]["rateByYear"];
+		var nameYeardataList = [];
+
+		// TODO: CHANGE TO MINYEAR & MAXYEAR
+		var startY = _.isUndefined(startYear)? 1880:startYear;
+		var endY = _.isUndefined(endYear)? 2014:endYear;
+
+		for(var year in nameYeardata) {
+			if(year >= startY && year <= endY) {
+				nameYeardataList.push({"year": year, "count": nameYeardata[year], "name": name, "gender": gender});
+			}		
+		}
+
+		yeargraph_svg.append("g")
+		.attr("class", "yeargraph "+name+'-'+gender)
+			.append("path")
+			.attr("d", yearArea(nameYeardataList))
+			.style("fill", color)
+			.style("opacity", 0.3)
+			.style("stroke", color);
+	};
+
+	var insertNamesList = function(id, list){
+		list.forEach(function(name){
+			d3.select(id+" .dropdown-menu").insert("li").append("a").text(name)
+				.on("click", function(){
+					suffix.forEach(function(gender){
+						var nametag = name.endsWith(gender)? name : (name+gender); 
+						if ( _.contains(allname, nametag)){
+							namesInput.tagsinput('add', nametag);
+						}
+					});
+					
+				});
+		});
+	};
+
+	insertNamesList("#presidents", president_names);
+	insertNamesList("#gameOfThrones", gameOfThrones);
+	insertNamesList("#top20_2014", top20_2014.map(function(name){return name.key;}));
+
+	var babyNamesByYear; 
+	var celebrities;
+	var colorScale;
+	d3.json("data/babynames.json", function(error, namedata){
+		if (error) { console.log(error); }
+		babyNamesByYear = namedata;
+		d3.json("data/celebrities.json", function(error, celebrityName){
+			celebrities = celebrityName;
+
+			// default: Alice(F) & Bob(M) ["Alice-F", "Bob-M"]
+			["Bill-M", 'Bill-F'].forEach(function(nametag){
+				namesInput.tagsinput('add', nametag);
+			});
+
+		});	
+	});
+	</script>
+	<script type="text/javascript">
+		var width = 1000,
+    height = 620;
+    padding=width/25;
+var projection = d3.geo.albersUsa()
+	.scale(1200)
+	.translate([width / 2, height / 2]);
+var path = d3.geo.path().projection(projection);
+var percentFormat = d3.format(".1%");
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var states;
+var namesObj;
+var t;
+var yr=2000;
+var gender='F';
+var name_size='10pt';
+
+d3.json("data/states.json", function(error, shapes) {
+states = topojson.feature(shapes, shapes.objects.state).features;
+	var statePaths = svg.append("g");
+		var geometries = shapes.objects.state.geometries;
+		var names=[];
+		var geoLength = geometries.length;
+		for(var i=0;i<geoLength;i++){
+			if(geometries[i].properties.STUSPS10!='PR')
+			names.push(geometries[i].properties.STUSPS10);
+		}
+		//console.log(names);
+	statesBabyName={};
+	statePaths.selectAll("path").data(states.filter(function (state) {return state.properties.STUSPS10!="PR"})).enter()
+	.append("path").attr("d", path)
+	.style("fill", "#CFDBC5").style("stroke", "white");
+
+var namesObj1={}; var t1;
+
+	d3.csv("data/StateNames.csv", function (error, rows) {
+	if (error) {console.log(error);}
+		t1=rows;
+
+		for(var z=1910;z<=2014;z++){
+var vsds={};
+(d3.values(t1.filter(function (row) {
+		return row.Year==z&&row.Gender=='F';}))).forEach(function(r){
+vsds[r.State]=r;
+});
+namesObj1[z+":"+"F"]=vsds;
+
+t1=t1.filter(function (row) {
+		return !(row.Year==z&&row.Gender=='F');});
+vsds={};
+(d3.values(t1.filter(function (row) {
+		return row.Year==z&&row.Gender=='M';}))).forEach(function(r){
+vsds[r.State]=r;
+});
+namesObj1[z+":"+"M"]=vsds;
+t1=t1.filter(function (row) {
+		return !(row.Year==z&&row.Gender=='M');});	
+		}
+trial2();
+//console.log(namesObj2);
+
+/*var opc=[0.09,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1];
+svg.selectAll("rect")
+    .data(opc)
+    .enter()
+    .append("rect")
+.attr("x",width-padding-10).attr("y",function(d,i){return height-padding*4-5+(padding*0.2*i)})
+		      	.attr("width",padding).attr("height",padding*0.2).style("fill",'#e84fd9').style("opacity",function(d){return d});*/
+
+});
+
+  $("input[type=radio]").on( "click", function() {
+  	gender = $( "input:checked" ).val();
+  
+trial2();
+
+});
+
+function trial2(){
+namesObj=namesObj1[yr+":"+gender];
+
+		names.forEach(function(name){
+			var m = namesObj[name];
+    	if(m)
+	statesBabyName[name]=m.Name+":"+m.Count;
+		else 
+			statesBabyName[name]=":0";
+		});
+
+		var a=d3.values(statesBabyName); var b={};
+var m=0;var popName; var totCount=0;
+
+a.forEach(function(d){
+if(d.substring(0,d.indexOf(':')) in b)
+b[d.substring(0,d.indexOf(':'))]=b[d.substring(0,d.indexOf(':'))]+Number(d.substring(d.indexOf(':')+1));
+else b[d.substring(0,d.indexOf(':'))]=Number(d.substring(d.indexOf(':')+1));
+});
+
+for (var key in b) {
+	if(b[key]>m){
+		popName=key;
+		m=b[key];
+	}
+	totCount+=b[key];
+}
+/*
+console.log(m+popName+totCount);
+console.log(namesObj);*/
+var max=0,min=10000000000;
+for (var key in namesObj) {
+	if(Number(namesObj[key].Count)>max)
+		max=namesObj[key].Count;
+if(Number(namesObj[key].Count)<min)
+		min=namesObj[key].Count;
+}
+var countRange= [min,max];/*d3.extent(namesObj,function (row) {return Number(row.Count)});*/
+var opacityScale = d3.scale.log().domain(countRange).range([0.09,1]);
+
+statePaths.selectAll("path").data(states.filter(function (state) {return state.properties.STUSPS10!="PR"}))
+.style('fill',function(d){
+    var n=namesObj[d.properties.STUSPS10].Name;
+        return n==popName?(gender=='F'?'#E25041':'#0020C2'):'#808080';})
+.style('opacity',function(d,i){
+var count=Number(namesObj[d.properties.STUSPS10].Count);
+    var n=namesObj[d.properties.STUSPS10].Name;
+    return n==popName?1:opacityScale(count);})
+.style("stroke","white");
+
+svg.selectAll("text").remove();
+	statePaths.selectAll("text")
+    .data(states.filter(function (state) {return state.properties.STUSPS10!="PR"}))
+    .enter()
+    .append("svg:text")
+    .text(function(d){
+        return namesObj[d.properties.STUSPS10].Name;
+    })
+    .attr("x", function(d){
+    	if(!path.centroid(d)[0])
+    		console.log(d.properties.STUSPS10);
+        return path.centroid(d)[0];
+    })
+    .attr("y", function(d){
+        return  path.centroid(d)[1];
+    })
+    .attr("text-anchor","middle")
+    .attr('font-size',name_size)
+    .attr('font-weight','bold')
+    .style('fill','black');
+
+    svg.append("text").attr("x",width/2).attr("y",height-15)
+    .attr('font-size','20pt')
+    .attr('font-weight','bold')
+    .style('fill',gender=='F'?'red':'#0020C2')
+    .text(popName+" : "+percentFormat(m/totCount));
+}
+
+
+	var slider = document.getElementById("slider");
+	slider.onchange = function () {
+	yr=slider.value;
+		document.getElementById("year").value=yr;
+trial2();
+
+		};
+
+   d3.select('#slider4').call(d3.slider().value(2000).min(1910).max(2014).step(1).on("slide", function(evt, value) {
+   	yr=value;
+      document.getElementById("year").value=yr;
+      trial2();
+    }));
+});
+	</script>
+</body>
+</html>

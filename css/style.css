@@ -1,0 +1,41 @@
+.bootstrap-tagsinput {width: 100%;}
+
+.scrollable-menu { max-height: 200px; overflow-x: hidden; }
+
+.list-group-item.F { background-color: rgba(255, 114, 73, 0.9); color: white; }
+.list-group-item.M { background-color: rgba(0, 200, 172, 0.8); color: white; }
+
+.label.F { background-color: rgba(255, 114, 73, 0.9);  }
+.label.M { background-color: rgba(0, 200, 172, 0.8);  }
+
+.label { opacity: 0.6; }
+.label.FOREIGN_CRIMSON {  background-color: #C91F37; }
+.label.PURE_CRIMSON { background-color: #C3272B; }
+.label.CHESTNUT_ROSE { background-color: #D24D57; }
+.label.MEDIUM_CRIMSON { background-color: #C93756; }
+.label.PEACH-COLORED { background-color: #F47983; }
+.label.IBIS_WING { background-color: #F58F84; }
+.label.WISTERIA_PURPLE {background-color: #875F9A; }
+.label.BELLFLOWER { background-color: #5D3F6A; }
+.label.TATARIAN_ASTER {background-color: #8D608C;}
+.label.SKY { background-color: #4D8FAC; }
+.label.PICTON {background-color: #59ABE3; }
+.label.LIGHT_BLUE { background-color: #48929B; }
+.label.JORDY { background-color: #89C4F4; }
+.label.STEEL_BLUE { background-color: #4B77BE; }
+.label.LAPIS_LAZULI { background-color: #1F4788; }
+.label.INDIGO {background-color: #264348;}
+.label.YOUNG_GREEN_ONION {background-color: #8DB255;}
+.label.FRESH_ONION { background-color: #5B8930; }
+.label.JUNGLE { background-color: #26C281; }
+.label.MOUNTAIN_MEADOW { background-color: #16A085; }
+.label.RIPE_LEMON {background-color: #F7CA18;}
+.label.CREAM_CAN {background-color: #F5D76E;}
+.label.GAMBOGE { background-color: #FFB61E; }
+.label.EGG-COLORED { background-color: #FFA631; }
+.label.ECSTASY { background-color: #F9690E; }
+.label.AMBER { background-color: #CA6924; }
+.label.HARBOR_RAT { background-color: #757D75; }
+.label.SILVER { background-color: #BFBFBF; }
+.label.LYNCH { background-color: #6C7A89; }
+.label.CASCADE { background-color: #95A5A6; }
