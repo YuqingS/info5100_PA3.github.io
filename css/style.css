@@ -1,4 +1,69 @@
 .bootstrap-tagsinput {width: 100%;}
+.namelist-btn {
+	color: #fff;
+    background-color: #26C281;
+    border-color: #89AAF4;
+}
+
+.h1 { 
+	// color: #111; 
+	font-family: 'Open Sans Condensed', 
+	sans-serif; 
+	font-size: 50px; 
+	font-weight: 700; 
+	line-height: 64px; 
+	margin: 0 0 0; 
+	padding: 20px 0 0 0; 
+	text-transform: uppercase; }
+.us-h2 { 
+	color: #111;
+    /* font-family: 'Open Sans Condensed', sans-serif; */
+    font-size: 25px;
+    font-weight: 300;
+    line-height: 64px;
+    /* margin-left: 20px; */
+    /* padding: 20px 30px; */
+    text-align: left;
+	}
+.state-h2 { 
+	color: #111; 
+	font-family: 'Open Sans Condensed', 
+	sans-serif; 
+	font-size: 25px; 
+	font-weight: 300; 
+	line-height: 64px; 
+	margin-left: 20px;
+	text-align: left; 
+	}
+
+.p { 
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    line-height: 28px;
+    margin-right: 00px;
+    /* margin-left: 200px; */
+    margin-bottom: 20px;
+ }
+ .button1{
+ 	margin-left: 20px
+ }
+  .button2{
+ 	margin-left: 20px
+ }
+
+ .radio1{
+ 	margin-left: 20px
+ }
+
+ .radio2{
+ 	margin-left: 20px
+ }
+
+
+.highlight {
+  fill: #008080;
+  font-weight: bold;
+}
 
 .scrollable-menu { max-height: 200px; overflow-x: hidden; }
 

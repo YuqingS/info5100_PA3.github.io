@@ -36,46 +36,54 @@
 	</style>
 </head>
 <body>
-	<div class="container">
-		<div>
-			<h1 class="h1"> US BABY NAMES</h1>
+	<div style="background-color: #26C281; color: white; opacity: 0.8;">
+		<div class="container">
+			<h1 class="h1">US Baby Names</h1>
 			<p class="p">With time, the trend of naming babies in US keeps changing. The popularity of the name might depends on <span class="highlight">meaning of the name</span>,<span class="highlight"> names of US presidents</span> or <span class="highlight">character names from popular series (like Game of Thrones)</span>. </p>
+			
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
 			<h2 class="us-h2">Overall Us Baby Names Trend</h2>
+			<p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Type names in input box below or select names from the lists. You can add at most 5 names in the input box. Then, you can explore the graph by zooming the graph to see trend for the names in a certain period of time. </p>			
 		</div>
 		<div class="row">
-			<div class="btn-group" id="presidents">
-			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			    US President Names <span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu scrollable-menu">
-			  </ul>
+			<div class="col-xs-12 col-md-7">
+				<div class="btn-group" id="presidents">
+				  <button type="button" class="btn btn-default dropdown-toggle namelist-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    US President Names <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu scrollable-menu">
+				  </ul>
+				</div>
+				<div class="btn-group" id="gameOfThrones">
+				  <button type="button" class="btn btn-default dropdown-toggle namelist-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    Game of Thrones-Inspired<span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu scrollable-menu">
+				  </ul>
+				</div>
+				<div class="btn-group" id="top20_2014">
+				  <button type="button" class="btn btn-default dropdown-toggle namelist-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    2014 Top 20 names <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu scrollable-menu">
+				  </ul>
+				</div>
 			</div>
-			<div class="btn-group" id="gameOfThrones">
-			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			    Game of Thrones-Inspired Names <span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu scrollable-menu">
-			  </ul>
-			</div>
-			<div class="btn-group" id="top20_2014">
-			  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			    2014 Top 20 names <span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu scrollable-menu">
-			  </ul>
-			</div>
-		</div>
-		<div class="row">
-			<div class="input-group" style="width: 100%;">
-			<input id="name_search" type="text" class="form-control" data-role="tagsinput">
-			<div id="removeall" class="input-group-addon" onclick="removeAllNames();">Remove all</div>
+			<div class="col-xs-12 col-md-5">
+				<div class="input-group" style="width: 100%;">
+				<input id="name_search" type="text" class="form-control" data-role="tagsinput">
+				<div id="removeall" class="input-group-addon" onclick="removeAllNames();">Remove all</div>
+				</div>
 			</div>
 		</div>
 		<div class="row" id="yeargraph_area">
 			<div class="col-xs-12" id="yeargraph"></div>
 		</div>
 
-				<div class="row">
+		<div class="row">
 			<h2 class="state-h2">Most Popular Baby Name in Each State</h2>
 			<input type="button" class="button1" value="Female" onclick="document.getElementById('rad1').click();">
 			<input type='radio' class="radio1" name='gender' id='rad1' value='F' CHECKED>
@@ -87,8 +95,6 @@
 			  <label for="year">Year:</label>
 			  <input type="text" id="year" value="2014" readonly style="border:0; color:#f6931f; font-weight:bold; font-size:20pt;">
 			<input class="slider-width" id="slider" type="range" min="1910" max="2014" value="2014"/><br>
-			 <div id="slider4"></div>
-			</div>
 		</div>
 		<div id="source">Sources from:<a href="https://www.kaggle.com/kaggle/us-baby-names">US Baby Names from Kaggle</a>
 		</div>
@@ -136,7 +142,7 @@
 			// rescale yscale
 			if (babyNamesByYear[tag]["max_rate"] == maxRate) 
 			{				
-					updateYScale();
+				updateYScale();
 			}
 			updateXScale();
 			updateGraph();
@@ -169,7 +175,7 @@
 		});
 	};
 
-	var padding = 15;
+	var padding = 20;
 	var yeargraph_width = document.getElementById("yeargraph").offsetWidth;
 	var yeargraph_height = yeargraph_width * 0.5;
 	d3.select("#yeargraph_area").style("height", yeargraph_height);
@@ -192,12 +198,19 @@
 
 	var yScale = d3.scale.linear()
 					.domain([0, 0.05])
-					.range([yeargraph_height - padding*2, padding]);
+					.range([yeargraph_height - padding*2, padding*2]);
 
 	var yAxis = d3.svg.axis()
 					.scale(yScale)
 					.orient("left")
-					.tickFormat(d3.format(".00000000"));
+					.tickFormat(d3.format(".0000"));
+	var yLabel = yeargraph_svg.append("text").text("%")
+					.attr("x", 5)
+					.attr("y", padding);
+	var xLable = yeargraph_svg.append("text").text("Year")
+					.attr("x", yeargraph_width-padding*2)
+					.attr("y", yeargraph_height - padding);
+
 	// brush
 	var brush = d3.svg.brush()
 	    .x(xScale)
@@ -499,7 +512,7 @@
 	var babyNamesByYear; 
 	var celebrities;
 	var colorScale;
-	d3.json("data/baby_update.json", function(error, namedata){
+	d3.json("data/babynames.json", function(error, namedata){
 		if (error) { console.log(error); }
 		babyNamesByYear = namedata;
 		d3.json("data/celebrities.json", function(error, celebrityName){
@@ -574,15 +587,6 @@ t1=t1.filter(function (row) {
 		return !(row.Year==z&&row.Gender=='M');});	
 		}
 trial2();
-//console.log(namesObj2);
-
-/*var opc=[0.09,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1];
-svg.selectAll("rect")
-    .data(opc)
-    .enter()
-    .append("rect")
-.attr("x",width-padding-10).attr("y",function(d,i){return height-padding*4-5+(padding*0.2*i)})
-		      	.attr("width",padding).attr("height",padding*0.2).style("fill",'#e84fd9').style("opacity",function(d){return d});*/
 
 });
 
