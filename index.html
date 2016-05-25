@@ -2,7 +2,6 @@
 <head>
 	<title>US Baby names</title>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script src="babynamelist.js"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
@@ -16,7 +15,8 @@
     <link rel="stylesheet" href="css/bootstrap-tagsinput.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/github.css">
-    <link rel="stylesheet" href="css/d3.slider.css"> 
+    <link rel="stylesheet" href="css/d3.slider.css">
+    <script src="babynamelist.js"></script> 
 
 	<style type="text/css">
 		.axis path { fill: none; stroke: black;}
@@ -45,7 +45,7 @@
 	</div>
 	<div class="container">
 		<div class="row">
-			<h2 class="us-h2">Overall Us Baby Names Trend</h2>
+			<h2 class="us-h2">US Baby Names Trends</h2>
 			<p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Type names in input box below or select names from the lists. Then, you can explore the graph by zooming the graph to see trends for the names in a certain period of time and clicking the white area to default scale. </p>			
 		</div>
 		<div class="row">
@@ -96,7 +96,7 @@
 			  <input type="text" id="year" value="2014" readonly style="border:0; color:#f6931f; font-weight:bold; font-size:20pt;">
 			<input class="slider-width" id="slider" type="range" min="1910" max="2014" value="2014"/><br>
 		</div>
-		<div id="source">Sources from:<a href="https://www.kaggle.com/kaggle/us-baby-names">US Baby Names from Kaggle</a>
+		<div id="source" class="row" style="text-align: center;">Sources from:<a target="_blank" href="https://www.kaggle.com/kaggle/us-baby-names">US Baby Names from Kaggle</a>
 		</div>
 
 	</div>
@@ -181,11 +181,9 @@
 
 	var yeargraph_svg = d3.select("#yeargraph")
 						.append("svg")
-						// .attr("width", yeargraph_width)
-      					// .attr("height", yeargraph_height)
             			.attr("viewBox", "0 0 "+yeargraph_width+" "+yeargraph_height)
-  						.attr("preserveAspectRatio", "xMidYMid meet")
-            			;
+  						.attr("preserveAspectRatio", "xMidYMid meet");
+
     //preserveAspectRatio="xMinYMin meet"
     var xScale = d3.scale.linear()
 					.domain([1880, 2014])
@@ -204,9 +202,10 @@
 					.scale(yScale)
 					.orient("left")
 					.tickFormat(d3.format(".0000"));
-	var yLabel = yeargraph_svg.append("text").text("%")
+	var yLabel = yeargraph_svg.append("text").text("Percentage of babys")
 					.attr("x", 5)
-					.attr("y", padding/2);
+					.attr("y", padding)
+					.style("font-size", 10);
 	var xLable = yeargraph_svg.append("text").text("Year")
 					.attr("x", yeargraph_width-padding*2)
 					.attr("y", yeargraph_height - padding);
@@ -228,7 +227,7 @@
 			var startY = Math.ceil(extent[0]);
 			var endY = Math.floor(extent[1]);
 			var upperbound = 0;
-			console.log(startY, endY)
+			console.log(startY, endY);
 			if(startY < endY)
 			{
 				// remove graph on chart
@@ -519,8 +518,8 @@
 		d3.json("data/celebrities.json", function(error, celebrityName){
 			celebrities = celebrityName;
 
-			// default: Alice(F) & Bob(M) ["Alice-F", "Bob-M"]
-			["Bill-M", 'Bill-F'].forEach(function(nametag){
+			// default: Alice(F) & Bob(M) 
+			["Alice-F", "Bob-M"].forEach(function(nametag){
 				namesInput.tagsinput('add', nametag);
 			});
 
@@ -528,7 +527,7 @@
 	});
 	</script>
 	<script type="text/javascript">
-		var width = 1000,
+var width = 1000,
     height = 620;
     padding=width/25;
 var projection = d3.geo.albersUsa()
@@ -537,8 +536,10 @@ var projection = d3.geo.albersUsa()
 var path = d3.geo.path().projection(projection);
 var percentFormat = d3.format(".1%");
 var svg = d3.select("#map").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+    // .attr("width", width)
+    // .attr("height", height);
+    .attr("viewBox", "0 0 "+width+" "+height)
+  	.attr("preserveAspectRatio", "xMidYMid meet");
 var states;
 var namesObj;
 var t;
@@ -625,9 +626,7 @@ for (var key in b) {
 	}
 	totCount+=b[key];
 }
-/*
-console.log(m+popName+totCount);
-console.log(namesObj);*/
+
 var max=0,min=10000000000;
 for (var key in namesObj) {
 	if(Number(namesObj[key].Count)>max)

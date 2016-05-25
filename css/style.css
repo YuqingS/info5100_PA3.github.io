@@ -4,6 +4,11 @@
     background-color: #26C281;
     border-color: #89AAF4;
 }
+.namelist-btn:hover, .namelist-btn.active,.btn-group.open .dropdown-toggle, .btn-group.open .dropdown-toggle:hover {
+	color: #fff;
+    background-color: #26C26C;
+    border-color: #89AAF4;
+}
 
 .h1 { 
 	// color: #111; 
