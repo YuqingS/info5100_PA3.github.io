@@ -46,7 +46,7 @@
 	<div class="container">
 		<div class="row">
 			<h2 class="us-h2">Overall Us Baby Names Trend</h2>
-			<p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Type names in input box below or select names from the lists. You can add at most 5 names in the input box. Then, you can explore the graph by zooming the graph to see trend for the names in a certain period of time. </p>			
+			<p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Type names in input box below or select names from the lists. Then, you can explore the graph by zooming the graph to see trends for the names in a certain period of time and clicking the white area to default scale. </p>			
 		</div>
 		<div class="row">
 			<div class="col-xs-12 col-md-7">
@@ -154,7 +154,6 @@
 			var tag = event.item;
 			var gender = tag.split("-")[1];
 			var name = tag.split("-")[0];
-			var colorScale = (gender == "F") ? fColorScale : mColorScale;
 
 			var color = colors.pop();
 			$(".label."+tag).addClass(color);
@@ -194,7 +193,8 @@
 	
 	var xAxis = d3.svg.axis()
 					.scale(xScale)
-					.orient("bottom");
+					.orient("bottom")
+					.tickFormat(d3.format("d"));
 
 	var yScale = d3.scale.linear()
 					.domain([0, 0.05])
@@ -206,7 +206,7 @@
 					.tickFormat(d3.format(".0000"));
 	var yLabel = yeargraph_svg.append("text").text("%")
 					.attr("x", 5)
-					.attr("y", padding);
+					.attr("y", padding/2);
 	var xLable = yeargraph_svg.append("text").text("Year")
 					.attr("x", yeargraph_width-padding*2)
 					.attr("y", yeargraph_height - padding);
@@ -217,9 +217,6 @@
 	    .on("brushend", brushed);
 
 	function brushed() {
-		// remove graph on chart
-		d3.selectAll(".yeargraph").remove();
-
 		// when brush empty, show graph	with default scales
 		if(brush.empty()) {
 			updateXScale();
@@ -231,6 +228,11 @@
 			var startY = Math.ceil(extent[0]);
 			var endY = Math.floor(extent[1]);
 			var upperbound = 0;
+			console.log(startY, endY)
+			if(startY < endY)
+			{
+				// remove graph on chart
+			d3.selectAll(".yeargraph").remove();
 			celebritiesList = [];
 
 	    	currentList.forEach(function(nameData){
@@ -255,10 +257,10 @@
 					if(!(celebrities[name].endY < startY) && !(celebrities[name].startY > endY)) {
 						celebritiesList.push(name);
 					}
-					
 				}
 			});	
 			showCelebrityBlock(celebritiesList);
+			}
 		}
 		
 		d3.select("rect.extent").attr("width", 0);
@@ -269,9 +271,8 @@
 		.attr("class", "x brush")
 		.call(brush)
 		.selectAll("rect")
-		.attr("y", padding)
+		.attr("y", padding*2)
 		.style("height", yScale(0)-yScale(yScale.domain()[1]) );
-	// end brush
 
 	var updateYScale = function(upperbound){
 		if(_.isUndefined(upperbound)) {
@@ -438,7 +439,7 @@
 	/*append x-axis*/
 	yeargraph_svg.append("g")
 		.attr("transform", 
-			"translate("+ 0 +","+(yeargraph_height-padding*2)+")")
+			"translate("+ 0 +","+(yeargraph_height - padding*2)+")")
 		.attr("class", "axis x")
 		.call(xAxis);
 
