@@ -499,7 +499,7 @@
 	var babyNamesByYear; 
 	var celebrities;
 	var colorScale;
-	d3.json("data/babynames.json", function(error, namedata){
+	d3.json("data/baby_update.json", function(error, namedata){
 		if (error) { console.log(error); }
 		babyNamesByYear = namedata;
 		d3.json("data/celebrities.json", function(error, celebrityName){
