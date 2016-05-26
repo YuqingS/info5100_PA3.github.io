@@ -331,6 +331,9 @@
 	var showCelebrityDetails = function(name, nameData){
 		// remove all elements on year graph svg
 		d3.selectAll(".yeargraph").remove();
+		if(nameData.endY > 2014) {
+			nameData.endY = 2014;
+		}
 
 		var currentKey = currentList.map(function(n){return n.nametag;});
 		currentKey = currentKey.filter(function(key){return key == name+"-F" || key == name+"-M";});
@@ -352,7 +355,8 @@
 		
 		currentKey.forEach(function(nametag) {
 			var gender = nametag.split("-")[1];
-			addNameToAreaChart(name, gender.replace("-",""), colorsMap[nametagColorMap[nametag]], nameData.startY, nameData.endY);
+			var end = (nameData.endY>2014)?2014:nameData.endY;
+			addNameToAreaChart(name, gender.replace("-",""), colorsMap[nametagColorMap[nametag]], nameData.startY, end);
 		});	
 		
 		var g = yeargraph_svg.append("g")
@@ -365,7 +369,7 @@
 			.attr("x", padding)
 			.attr("y", yScale(0) - 200 -padding);
 		g.append("text").text(nameData.pName)
-			.attr("x", padding)
+			.attr("x", padding+10)
 			.attr("y", yScale(0) - 15)
 			.style("font-size", 20)
 			.style("fill", "#757D75");
